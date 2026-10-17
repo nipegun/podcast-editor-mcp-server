@@ -1,0 +1,69 @@
+name: podcast-tight
+description: >-
+  Aggressive preset, paced like a hand edit. Removes filler words, accidental
+  repetitions and false starts automatically, and shortens every gap between
+  words longer than 0.3 s - breaths, throat clearings and noises included - to
+  about a tenth of a second. Only the keys that differ from the built-in
+  defaults are listed; everything else falls back to those defaults.
+
+transcription:
+  model: large-v3
+  word_timestamps: true
+  chunking: speech
+
+silence:
+  remove_when_longer_than_ms: 1200
+  replacement_duration_ms: 350
+  head_target_ms: 300
+  tail_target_ms: 700
+  detect_from_vad: true
+  # The pacing of a hand edit: every gap between words longer than 0.3 s,
+  # whatever it holds (breath, throat clearing, noise), becomes about 0.12 s.
+  tighten_word_gaps: true
+  word_gap_max_ms: 300
+  word_gap_keep_after_ms: 70
+  word_gap_keep_before_ms: 50
+
+cuts:
+  pre_margin_ms: 30
+  post_margin_ms: 60
+  crossfade_ms: 12
+  snap_to_low_energy: true
+  snap_window_ms: 80
+  verify_joins: true
+
+retakes:
+  enabled: true
+  auto_remove: true
+  unique_content: cut
+
+fillers:
+  enabled: true
+  auto_remove: true
+  min_probability: 0.5
+  require_isolation: true
+  max_per_minute: 15.0
+
+repetitions:
+  enabled: true
+  auto_remove: true
+  similarity: 0.88
+
+false_starts:
+  enabled: true
+  auto_remove: true
+
+cleanup:
+  high_pass_hz: 90.0
+  compress: true
+  compressor:
+    threshold_db: -20.0
+    ratio: 3.5
+    attack_ms: 15.0
+    release_ms: 200.0
+    makeup_db: 0.0
+    knee_db: 9.0
+
+safety:
+  max_deleted_fraction: 0.55
+  max_single_delete_seconds: 90.0

@@ -1,0 +1,46 @@
+name: voice-cleanup
+description: >-
+  Clean-up and mastering only. Nothing is cut from the content: no pause
+  shortening, no head or tail trimming, no filler removal. Use this when you
+  want the recording left exactly as spoken but cleaned and levelled. Runs
+  without transcription, so it needs no Whisper model.
+
+transcription:
+  backend: none
+
+vad:
+  backend: energy
+
+silence:
+  remove_when_longer_than_ms: 600000
+  replacement_duration_ms: 0
+  trim_head: false
+  trim_tail: false
+
+fillers:
+  enabled: false
+
+repetitions:
+  enabled: false
+
+false_starts:
+  enabled: false
+
+retakes:
+  enabled: false
+
+cleanup:
+  high_pass_hz: 75.0
+  denoise: true
+  denoise_reduction_db: 10.0
+  compress: false
+
+output:
+  formats:
+    - wav
+  audacity_project: true
+  transcript_formats: []
+
+safety:
+  max_deleted_fraction: 0.05
+  max_single_delete_seconds: 10.0

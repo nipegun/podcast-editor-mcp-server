@@ -1,0 +1,43 @@
+[Unit]
+# Keeps a headless Audacity alive so the .aup3 backend is always reachable.
+#
+# This is a --user unit on purpose. Audacity refuses to run as root, the
+# script pipes are per-uid, and the projects belong to the person, not to the
+# system. There is deliberately no system-wide equivalent.
+#
+# It is entirely optional: podcast-editor-mcp-server does every edit, measurement and export
+# through FFmpeg, and only the editable Audacity project needs this.
+#
+# The installed copy of this file lives inside the installation prefix, at
+# /opt/podcast-editor-mcp-server/lib/systemd/user/, like everything else the product owns.
+# systemd only ever sees a symbolic link to it.
+#
+# Enable it as yourself, never with sudo:
+#   systemctl --user enable --now podcast-editor-mcp-server-audacity.service
+Description=Headless Audacity for podcast-editor-mcp-server
+Documentation=https://github.com/nipegun/podcast-editor-mcp-server/blob/main/doc/MANUAL.md
+After=graphical-session.target
+# A restart loop would spawn Audacity processes faster than they can be
+# noticed. Give up after three attempts in five minutes and stay stopped.
+StartLimitIntervalSec=300
+StartLimitBurst=3
+
+[Service]
+Type=simple
+# The launcher starts Xvfb when there is no display, starts Audacity, waits for
+# the script pipes and only then reports success. It exits non-zero rather than
+# hanging if any of that fails.
+ExecStart=@BINDIR@/podcast-editor-mcp-server-cli audacity-status --start --xvfb
+# --start returns once Audacity is answering, but Audacity itself keeps
+# running in its own session, so the unit stays active with it.
+RemainAfterExit=yes
+ExecStop=/bin/sh -c 'pkill -u "$(id -u)" -x audacity || true'
+
+Restart=on-failure
+RestartSec=30
+
+# Audacity needs a writable home and the shared /tmp for its pipes; nothing else.
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=default.target

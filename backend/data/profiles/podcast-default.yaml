@@ -1,0 +1,179 @@
+name: podcast-default
+description: >-
+  Conversational podcast preset. Keeps the last take of everything said more
+  than once and removes talk about the recording, shortens long pauses (noisy
+  ones included), trims the head and tail, cleans up rumble and masters to
+  -16 LUFS / -1 dBTP. Every cut through speech is checked by listening to the
+  join. Filler words, repetitions and false starts are reported as candidates
+  but never removed automatically; neither are phrases that may have been
+  abandoned: those are left to you or to the agent driving the server.
+
+transcription:
+  backend: faster-whisper
+  model: large-v3
+  language: es
+  device: auto
+  compute_type: auto
+  cpu_threads: 0
+  num_workers: 1
+  batch_size: 0
+  beam_size: 5
+  word_timestamps: true
+  vad_filter: true
+  condition_on_previous_text: false
+  # One transcription call per stretch of speech, so retakes stay visible.
+  chunking: speech
+
+vad:
+  backend: silero
+  threshold: 0.5
+  min_speech_duration_ms: 150
+  min_silence_duration_ms: 400
+  speech_pad_ms: 100
+  max_speech_duration_s: 30.0
+
+silence:
+  minimum_detectable_ms: 250
+  remove_when_longer_than_ms: 2500
+  replacement_duration_ms: 600
+  preserve_natural_pauses: true
+  threshold_mode: auto
+  threshold_db: -45.0
+  auto_margin_db: 6.0
+  head_target_ms: 500
+  tail_target_ms: 1000
+  trim_head: true
+  trim_tail: true
+  detect_from_vad: true
+
+cuts:
+  pre_margin_ms: 40
+  post_margin_ms: 80
+  crossfade_ms: 10
+  snap_to_low_energy: true
+  snap_window_ms: 60
+  min_cut_duration_ms: 40
+  verify_joins: true
+  verify_context_seconds: 3.0
+  verify_max_attempts: 8
+
+fillers:
+  enabled: true
+  auto_remove: false
+  words:
+    - eh
+    - ehh
+    - ehhh
+    - em
+    - mmm
+    - mm
+    - hmm
+    - o sea
+    - a ver
+  patterns:
+    - "e+h+"
+    - "e+m+"
+    - "m{2,}"
+    - "h+m+"
+  keep_when_followed_by:
+    - que
+  max_duration_ms: 900
+  min_probability: 0.4
+  require_isolation: true
+  isolation_gap_ms: 120
+  max_per_minute: 12.0
+
+repetitions:
+  enabled: true
+  auto_remove: false
+  min_words: 2
+  max_words: 12
+  max_gap_seconds: 6.0
+  similarity: 0.82
+
+false_starts:
+  enabled: true
+  auto_remove: false
+  markers:
+    - perdón
+    - perdon
+    - perdona
+    - digo
+    - mejor dicho
+    - quiero decir
+    - sorry
+    - i mean
+  lookback_seconds: 8.0
+  max_removed_seconds: 12.0
+
+retakes:
+  enabled: true
+  # The last complete take is the good one: clear retakes and talk about the
+  # recording are removed without asking.
+  auto_remove: true
+  max_distance_seconds: 300.0
+  max_take_words: 400
+  min_anchor_words: 2
+  min_coverage: 0.6
+  phrase_gap_ms: 300
+  restart_gap_ms: 450
+  # The last take wins even when an earlier one says something it does not:
+  # restarting a section means the speaker discarded what came before. The
+  # cut is listed in the report, so nothing goes unnoticed.
+  unique_content: cut
+  report_abandoned_phrases: true
+
+loudness:
+  integrated_lufs: -16.0
+  true_peak_dbtp: -1.0
+  loudness_range: 11.0
+  normalize: true
+  apply_limiter: true
+  limiter_attack_ms: 5.0
+  limiter_release_ms: 50.0
+  dual_pass: true
+
+cleanup:
+  high_pass_hz: 80.0
+  low_pass_hz: null
+  denoise: false
+  denoise_reduction_db: 12.0
+  denoise_floor_offset_db: 0.0
+  compress: false
+  compressor:
+    threshold_db: -18.0
+    ratio: 3.0
+    attack_ms: 20.0
+    release_ms: 250.0
+    makeup_db: 0.0
+    knee_db: 9.0
+
+output:
+  sample_rate: 48000
+  channels: 1
+  formats:
+    - wav
+    - mp3
+  wav_codec: pcm_s24le
+  mp3_bitrate_kbps: 128
+  mp3_mode: cbr
+  mp3_vbr_quality: 2
+  flac_compression: 5
+  fade_in_ms: 0
+  fade_out_ms: 0
+  audacity_project: true
+  transcript_formats:
+    - json
+    - txt
+    - srt
+  transcript_source: master
+
+safety:
+  max_deleted_fraction: 0.40
+  max_single_delete_seconds: 120.0
+  max_single_retake_seconds: 600.0
+  reject_overlapping_operations: true
+  max_operations: 5000
+  min_output_duration_seconds: 1.0
+  max_inserted_seconds: 600.0
+  max_gain_db: 24.0

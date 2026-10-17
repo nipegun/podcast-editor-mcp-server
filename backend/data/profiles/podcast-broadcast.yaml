@@ -1,0 +1,51 @@
+name: podcast-broadcast
+description: >-
+  Preset for platforms that ask for a quieter master, such as -19 LUFS mono.
+  Editing behaviour matches podcast-default; only the mastering chain and the
+  delivery formats change. Only the keys that differ from the built-in defaults
+  are listed.
+
+transcription:
+  chunking: speech
+
+silence:
+  detect_from_vad: true
+
+cuts:
+  verify_joins: true
+
+retakes:
+  enabled: true
+  auto_remove: true
+  unique_content: cut
+
+loudness:
+  integrated_lufs: -19.0
+  true_peak_dbtp: -2.0
+  loudness_range: 9.0
+  normalize: true
+  apply_limiter: true
+  dual_pass: true
+
+cleanup:
+  high_pass_hz: 80.0
+  compress: true
+  compressor:
+    threshold_db: -22.0
+    ratio: 2.5
+    attack_ms: 25.0
+    release_ms: 300.0
+    makeup_db: 0.0
+    knee_db: 9.0
+
+output:
+  sample_rate: 44100
+  channels: 1
+  formats:
+    - wav
+    - flac
+    - mp3
+  wav_codec: pcm_s24le
+  mp3_bitrate_kbps: 192
+  fade_in_ms: 20
+  fade_out_ms: 400

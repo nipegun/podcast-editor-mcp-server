@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=77.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "podcast-editor-mcp-server"
+version = "0.1.0"
+description = "MCP server for automatic podcast editing and post-production on Debian 13"
+readme = "README.md"
+requires-python = ">=3.13"
+license = "MIT"
+authors = [{ name = "podcast-editor-mcp-server contributors" }]
+keywords = ["mcp", "podcast", "audio", "ffmpeg", "audacity", "whisper"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: End Users/Desktop",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Multimedia :: Sound/Audio :: Editors",
+]
+
+dependencies = [
+  "mcp>=2.0.0,<3.0.0",
+  "pydantic>=2.9,<3.0",
+  "PyYAML>=6.0,<7.0",
+  "numpy>=1.26,<3.0",
+  "soundfile>=0.12,<1.0",
+]
+
+[project.optional-dependencies]
+# Local speech-to-text. Installed by install.sh unless --no-transcription is given.
+# CTranslate2 4.5 and later link cuDNN 9, the only one the installer provides.
+whisper = ["faster-whisper>=1.1,<2.0", "ctranslate2>=4.5,<5.0"]
+
+[project.scripts]
+podcast-editor-mcp-server = "podcast_editor_mcp_server.server:fMain"
+podcast-editor-mcp-server-cli = "podcast_editor_mcp_server.cli:fMain"
+podcast-editor-mcp-server-doctor = "podcast_editor_mcp_server.doctor:fMain"
+
+[project.urls]
+Homepage = "https://github.com/nipegun/podcast-editor-mcp-server"
+Documentation = "https://github.com/nipegun/podcast-editor-mcp-server/tree/main/doc"
+
+[tool.setuptools]
+# Map the installed namespace to the backend directory itself.
+package-dir = { "podcast_editor_mcp_server" = "backend" }
+
+[tool.setuptools.package-data]
+"podcast_editor_mcp_server.data" = ["profiles/*.yaml"]
